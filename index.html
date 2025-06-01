@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Buoy Video Prototype</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            overflow: hidden;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB 0%, #4682B4 50%, #1E90FF 100%);
+        }
+        
+        .ocean {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to bottom, rgba(30,144,255,0.8) 0%, rgba(0,100,200,0.9) 100%);
+            overflow: hidden;
+        }
+        
+        .waves {
+            position: absolute;
+            top: 0;
+            width: 200%;
+            height: 20px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10"><path d="M0,5 Q25,0 50,5 Q75,10 100,5" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg>');
+            animation: wave 3s linear infinite;
+        }
+        
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        .buoy {
+            position: absolute;
+            left: 45%;
+            top: 35%;
+            width: 60px;
+            height: 80px;
+            z-index: 10;
+            animation: float 2s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .buoy-body {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #ff6600, #cc5200);
+            border-radius: 50% 50% 30% 30%;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .solar-panel {
+            position: absolute;
+            top: -8px;
+            left: 10px;
+            width: 40px;
+            height: 15px;
+            background: linear-gradient(45deg, #1a5276, #2980b9);
+            border-radius: 2px;
+        }
+        
+        .camera {
+            position: absolute;
+            top: -25px;
+            left: 22px;
+            width: 16px;
+            height: 16px;
+            background: #333;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            animation: camera-rotate 4s linear infinite;
+        }
+        
+        @keyframes camera-rotate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(45deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-45deg); }
+            100% { transform: rotate(0deg); }
+        }
+        
+        .antenna {
+            position: absolute;
+            top: -40px;
+            left: 28px;
+            width: 4px;
+            height: 20px;
+            background: #333;
+            border-radius: 2px;
+        }
+        
+        .signal-ring {
+            position: absolute;
+            top: -45px;
+            left: 25px;
+            width: 10px;
+            height: 10px;
+            border: 2px solid #00ff00;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .signal-ring.active {
+            animation: signal-pulse 2s infinite;
+        }
+        
+        @keyframes signal-pulse {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(6);
+                opacity: 0;
+            }
+        }
+        
+        .alert-ring {
+            position: absolute;
+            top: -45px;
+            left: 25px;
+            width: 10px;
+            height: 10px;
+            border: 2px solid #ff0000;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .alert-ring.active {
+            animation: alert-pulse 1s infinite;
+        }
+        
+        @keyframes alert-pulse {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(8);
+                opacity: 0;
+            }
+        }
+        
+        .boat {
+            position: absolute;
+            right: 15%;
+            top: 38%;
+            width: 80px;
+            height: 40px;
+            z-index: 5;
+            animation: boat-movement 8s ease-in-out infinite;
+        }
+        
+        @keyframes boat-movement {
+            0%, 100% { transform: translateX(0px) translateY(0px); }
+            25% { transform: translateX(-20px) translateY(-5px); }
+            50% { transform: translateX(-10px) translateY(-3px); }
+            75% { transform: translateX(-30px) translateY(-8px); }
+        }
+        
+        .boat-hull {
+            width: 80px;
+            height: 25px;
+            background: linear-gradient(145deg, #8b4513, #654321);
+            border-radius: 0 20px 10px 10px;
+            position: relative;
+        }
+        
+        .boat-cabin {
+            position: absolute;
+            left: 20px;
+            top: -15px;
+            width: 25px;
+            height: 15px;
+            background: #8b4513;
+            border-radius: 2px;
+        }
+        
+        .fishing-net {
+            position: absolute;
+            left: -20px;
+            top: 25px;
+            width: 40px;
+            height: 60px;
+            opacity: 0.7;
+        }
+        
+        .net-line {
+            position: absolute;
+            width: 2px;
+            background: #666;
+            animation: net-sway 3s ease-in-out infinite;
+        }
+        
+        @keyframes net-sway {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(10deg); }
+        }
+        
+        .drone {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            z-index: 15;
+        }
+        
+        .patrol-drone {
+            left: 10%;
+            top: 15%;
+            opacity: 0;
+            animation: patrol-drone-arrival 3s ease-in-out 6s forwards;
+        }
+        
+        @keyframes patrol-drone-arrival {
+            0% { 
+                opacity: 0;
+                transform: translateX(-100px) translateY(-50px) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(150px) translateY(30px) scale(1);
+            }
+            100% { 
+                opacity: 1;
+                transform: translateX(200px) translateY(50px) scale(1);
+            }
+        }
+        
+        .surveillance-drone {
+            right: 5%;
+            top: 25%;
+            opacity: 0;
+            animation: surveillance-drone-path 4s ease-in-out 7s forwards;
+        }
+        
+        @keyframes surveillance-drone-path {
+            0% { 
+                opacity: 0;
+                transform: translateX(100px) translateY(-100px) scale(0.7);
+            }
+            25% {
+                opacity: 1;
+                transform: translateX(0px) translateY(-20px) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(-50px) translateY(10px) scale(1);
+            }
+            100% { 
+                opacity: 1;
+                transform: translateX(-100px) translateY(30px) scale(1);
+            }
+        }
+        
+        .interceptor-drone {
+            left: 70%;
+            top: 10%;
+            opacity: 0;
+            animation: interceptor-drone-fast 2s ease-in-out 8s forwards;
+        }
+        
+        @keyframes interceptor-drone-fast {
+            0% { 
+                opacity: 0;
+                transform: translateX(-200px) translateY(-100px) scale(0.8) rotate(0deg);
+            }
+            100% { 
+                opacity: 1;
+                transform: translateX(-150px) translateY(100px) scale(1.2) rotate(15deg);
+            }
+        }
+        
+        .drone-body {
+            width: 20px;
+            height: 15px;
+            background: #444;
+            border-radius: 3px;
+            position: relative;
+            margin: 10px;
+        }
+        
+        .patrol-drone .drone-body {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .surveillance-drone .drone-body {
+            background: linear-gradient(145deg, #8e44ad, #9b59b6);
+            box-shadow: 0 2px 4px rgba(142,68,173,0.3);
+        }
+        
+        .interceptor-drone .drone-body {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            box-shadow: 0 2px 4px rgba(231,76,60,0.3);
+            width: 25px;
+            height: 18px;
+        }
+        
+        .drone-propeller {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #222;
+            border-radius: 50%;
+            animation: propeller-spin 0.1s linear infinite;
+        }
+        
+        @keyframes propeller-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .prop1 { top: -4px; left: -4px; }
+        .prop2 { top: -4px; right: -4px; }
+        .prop3 { bottom: -4px; left: -4px; }
+        .prop4 { bottom: -4px; right: -4px; }
+        
+        .sonar-wave {
+            position: absolute;
+            left: 45%;
+            top: 60%;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-radius: 50%;
+            opacity: 0;
+            animation: sonar-pulse 3s infinite 1s;
+        }
+        
+        @keyframes sonar-pulse {
+            0% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(6);
+                opacity: 0;
+            }
+        }
+        
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid #00ff00;
+            min-width: 300px;
+        }
+        
+        .status-item {
+            margin: 5px 0;
+            opacity: 0;
+            animation: fade-in 0.5s forwards;
+        }
+        
+        .status-item:nth-child(1) { animation-delay: 1s; }
+        .status-item:nth-child(2) { animation-delay: 2s; }
+        .status-item:nth-child(3) { animation-delay: 3s; }
+        .status-item:nth-child(4) { animation-delay: 4s; }
+        .status-item:nth-child(5) { animation-delay: 5s; }
+        .status-item:nth-child(6) { animation-delay: 6s; }
+        .status-item:nth-child(7) { animation-delay: 7s; }
+        .status-item:nth-child(8) { animation-delay: 8s; }
+        .status-item:nth-child(9) { animation-delay: 9s; }
+        .status-item:nth-child(10) { animation-delay: 10s; }
+        
+        @keyframes fade-in {
+            to { opacity: 1; }
+        }
+        
+        .alert { color: #ff0000; }
+        .warning { color: #ffaa00; }
+        .success { color: #00ff00; }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        
+        .btn {
+            background: linear-gradient(145deg, #2980b9, #3498db);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        
+        .timeline {
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            right: 20px;
+            height: 60px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .timeline-bar {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            position: relative;
+            margin-top: 10px;
+        }
+        
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #ffaa00, #ff0000);
+            border-radius: 2px;
+            width: 0%;
+            animation: timeline-progress 15s linear infinite;
+        }
+        
+        @keyframes timeline-progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        
+        .timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <div class="ocean">
+            <div class="waves"></div>
+        </div>
+        
+        <div class="buoy">
+            <div class="buoy-body">
+                <div class="solar-panel"></div>
+                <div class="camera"></div>
+                <div class="antenna"></div>
+                <div class="signal-ring" id="normalSignal"></div>
+                <div class="alert-ring" id="alertSignal"></div>
+            </div>
+        </div>
+        
+        <div class="boat">
+            <div class="boat-hull">
+                <div class="boat-cabin"></div>
+            </div>
+            <div class="fishing-net">
+                <div class="net-line" style="left: 0px; height: 40px;"></div>
+                <div class="net-line" style="left: 10px; height: 50px;"></div>
+                <div class="net-line" style="left: 20px; height: 45px;"></div>
+                <div class="net-line" style="left: 30px; height: 55px;"></div>
+            </div>
+        </div>
+        
+        <div class="drone patrol-drone">
+            <div class="drone-body">
+                <div class="drone-propeller prop1"></div>
+                <div class="drone-propeller prop2"></div>
+                <div class="drone-propeller prop3"></div>
+                <div class="drone-propeller prop4"></div>
+            </div>
+        </div>
+        
+        <div class="drone surveillance-drone">
+            <div class="drone-body">
+                <div class="drone-propeller prop1"></div>
+                <div class="drone-propeller prop2"></div>
+                <div class="drone-propeller prop3"></div>
+                <div class="drone-propeller prop4"></div>
+            </div>
+        </div>
+        
+        <div class="drone interceptor-drone">
+            <div class="drone-body">
+                <div class="drone-propeller prop1"></div>
+                <div class="drone-propeller prop2"></div>
+                <div class="drone-propeller prop3"></div>
+                <div class="drone-propeller prop4"></div>
+            </div>
+        </div>
+        
+        <div class="sonar-wave"></div>
+        
+        <div class="hud">
+            <div style="color: #00ff00; font-weight: bold; margin-bottom: 10px;">🛡️ SMART BUOY SYSTEM v2.1</div>
+            <div class="status-item">🟢 System Online - Monitoring Area</div>
+            <div class="status-item">📡 Sonar Detection: Active</div>
+            <div class="status-item">📹 Camera System: Scanning</div>
+            <div class="status-item warning">⚠️ Vessel Detected: 850m Northeast</div>
+            <div class="status-item alert">🚨 ILLEGAL FISHING DETECTED!</div>
+            <div class="status-item alert">📤 Alert Sent to Authorities</div>
+            <div class="status-item success">🚁 Patrol Drone Dispatched</div>
+            <div class="status-item success">📹 Surveillance Drone Recording</div>
+            <div class="status-item success">⚡ Interceptor Drone En Route</div>
+            <div class="status-item warning">🛡️ Multi-Drone Formation Active</div>
+        </div>
+        
+        <div class="timeline">
+            <div style="color: white; font-weight: bold;">Simulation Timeline</div>
+            <div class="timeline-bar">
+                <div class="timeline-progress"></div>
+            </div>
+            <div class="timeline-labels">
+                <span>System Start</span>
+                <span>Detection</span>
+                <span>Analysis</span>
+                <span>Alert</span>
+                <span>Patrol Drone</span>
+                <span>Multi-Drone Response</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="restartSimulation()">🔄 Restart Simulation</button>
+            <button class="btn" onclick="togglePause()">⏸️ Pause/Resume</button>
+        </div>
+    </div>
+
+    <script>
+        let animationPaused = false;
+        let timelineInterval;
+        
+        function startSimulation() {
+            // Normal operation signals
+            setTimeout(() => {
+                document.getElementById('normalSignal').classList.add('active');
+            }, 1000);
+            
+            // Alert signals when illegal fishing detected
+            setTimeout(() => {
+                document.getElementById('normalSignal').classList.remove('active');
+                document.getElementById('alertSignal').classList.add('active');
+            }, 5000);
+            
+            // Reset and restart cycle
+            setTimeout(() => {
+                restartSimulation();
+            }, 15000);
+        }
+        
+        function restartSimulation() {
+            // Reset all animations
+            document.getElementById('normalSignal').classList.remove('active');
+            document.getElementById('alertSignal').classList.remove('active');
+            
+            // Restart the timeline
+            const progress = document.querySelector('.timeline-progress');
+            progress.style.animation = 'none';
+            setTimeout(() => {
+                progress.style.animation = 'timeline-progress 15s linear infinite';
+            }, 100);
+            
+            // Restart the simulation
+            setTimeout(startSimulation, 500);
+        }
+        
+        function togglePause() {
+            animationPaused = !animationPaused;
+            const elements = document.querySelectorAll('*');
+            elements.forEach(el => {
+                if (animationPaused) {
+                    el.style.animationPlayState = 'paused';
+                } else {
+                    el.style.animationPlayState = 'running';
+                }
+            });
+        }
+        
+        // Start the simulation when page loads
+        window.onload = function() {
+            startSimulation();
+        };
+        
+        // Add some interactive water ripples
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('ocean') || e.target.classList.contains('waves')) {
+                createRipple(e.clientX, e.clientY);
+            }
+        });
+        
+        function createRipple(x, y) {
+            const ripple = document.createElement('div');
+            ripple.style.position = 'absolute';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.width = '10px';
+            ripple.style.height = '10px';
+            ripple.style.border = '2px solid rgba(255,255,255,0.5)';
+            ripple.style.borderRadius = '50%';
+            ripple.style.transform = 'translate(-50%, -50%)';
+            ripple.style.pointerEvents = 'none';
+            ripple.style.animation = 'ripple-effect 2s ease-out forwards';
+            
+            document.body.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 2000);
+        }
+        
+        // Add ripple effect CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple-effect {
+                0% {
+                    transform: translate(-50%, -50%) scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(20);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
